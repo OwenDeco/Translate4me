@@ -299,6 +299,107 @@ PHRASES.forEach(p => {
   phrasesGrid.appendChild(card);
 });
 
+// ── Live Lens ─────────────────────────────────────────────────────────────────
+
+const lensBtn        = document.getElementById('lens-btn');
+const lensModal      = document.getElementById('lens-modal');
+const lensClose      = document.getElementById('lens-close');
+const lensVideo      = document.getElementById('lens-video');
+const lensCanvas     = document.getElementById('lens-canvas');
+const lensCapture    = document.getElementById('lens-capture');
+const lensOverlay    = document.getElementById('lens-overlay');
+const lensOriginal   = document.getElementById('lens-original');
+const lensTranslation= document.getElementById('lens-translation');
+const lensSpinner    = document.getElementById('lens-spinner');
+const lensUseBtn     = document.getElementById('lens-use-btn');
+const lensDirLabel   = document.getElementById('lens-dir-label');
+
+let lensStream = null;
+let lensState  = 'live'; // 'live' | 'captured'
+
+function lensShowLive() {
+  lensState = 'live';
+  lensVideo.classList.remove('hidden');
+  lensCanvas.classList.add('hidden');
+  lensOverlay.classList.add('hidden');
+  lensCapture.textContent = '📷 Capture & Translate';
+  lensCapture.disabled = false;
+}
+
+async function openLens() {
+  lensDirLabel.textContent = direction === 'en-ja' ? 'EN → JA' : 'JA → EN';
+  lensModal.classList.remove('hidden');
+  lensShowLive();
+  try {
+    lensStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } },
+      audio: false,
+    });
+    lensVideo.srcObject = lensStream;
+  } catch {
+    showError('Camera access denied.');
+    closeLens();
+  }
+}
+
+function closeLens() {
+  if (lensStream) { lensStream.getTracks().forEach(t => t.stop()); lensStream = null; }
+  lensModal.classList.add('hidden');
+  lensVideo.srcObject = null;
+}
+
+async function captureAndTranslate() {
+  lensCanvas.width  = lensVideo.videoWidth  || 1280;
+  lensCanvas.height = lensVideo.videoHeight || 720;
+  lensCanvas.getContext('2d').drawImage(lensVideo, 0, 0);
+
+  lensVideo.classList.add('hidden');
+  lensCanvas.classList.remove('hidden');
+  lensOverlay.classList.add('hidden');
+  lensSpinner.classList.remove('hidden');
+  lensCapture.disabled = true;
+
+  lensCanvas.toBlob(async blob => {
+    try {
+      const fd = new FormData();
+      fd.append('image', blob, 'lens.jpg');
+      fd.append('direction', direction);
+      const res  = await fetch('/api/scan', { method: 'POST', body: fd });
+      const data = await res.json();
+      lensOriginal.textContent    = data.original    || '';
+      lensTranslation.textContent = data.translation || 'No text found';
+      lensOverlay.classList.remove('hidden');
+    } catch {
+      lensTranslation.textContent = 'Translation failed — try again';
+      lensOriginal.textContent    = '';
+      lensOverlay.classList.remove('hidden');
+    } finally {
+      lensSpinner.classList.add('hidden');
+      lensState = 'captured';
+      lensCapture.textContent = '🔄 Try Again';
+      lensCapture.disabled = false;
+    }
+  }, 'image/jpeg', 0.85);
+}
+
+lensCapture.addEventListener('click', () => {
+  if (lensState === 'live') {
+    captureAndTranslate();
+  } else {
+    lensShowLive();
+  }
+});
+
+lensUseBtn.addEventListener('click', () => {
+  sourceText.value = lensOriginal.textContent;
+  updateCharCount();
+  setOutput(lensTranslation.textContent);
+  closeLens();
+});
+
+lensBtn.addEventListener('click', openLens);
+lensClose.addEventListener('click', closeLens);
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 updateLabels();

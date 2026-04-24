@@ -32,6 +32,7 @@
 
         <div class="panel-actions">
           <div class="action-group">
+            <button class="icon-btn" id="lens-btn">🔍 Lens</button>
             <button class="icon-btn" id="scan-btn">📷 Scan</button>
             <button class="icon-btn" id="listen-btn">🎤 Listen</button>
             <button class="icon-btn" id="clear-btn">✕ Clear</button>
@@ -74,6 +75,34 @@
   <footer>
     <p>Made for Japanese Travels &nbsp;🗾</p>
   </footer>
+
+  <!-- Lens modal -->
+  <div id="lens-modal" class="lens-modal hidden">
+    <div class="lens-header">
+      <span class="lens-title">🔍 Live Lens</span>
+      <div class="lens-header-actions">
+        <span id="lens-dir-label" class="lens-dir-label"></span>
+        <button id="lens-close" class="lens-close-btn">✕</button>
+      </div>
+    </div>
+    <div class="lens-viewport">
+      <video id="lens-video" autoplay playsinline muted></video>
+      <canvas id="lens-canvas" class="hidden"></canvas>
+      <div id="lens-overlay" class="lens-overlay hidden">
+        <div class="lens-overlay-inner">
+          <p id="lens-original" class="lens-original"></p>
+          <p id="lens-translation" class="lens-translation"></p>
+          <button id="lens-use-btn" class="lens-use-btn">Use Translation ↗</button>
+        </div>
+      </div>
+      <div id="lens-spinner" class="lens-spinner hidden">
+        <span>Translating…</span>
+      </div>
+    </div>
+    <div class="lens-controls">
+      <button id="lens-capture" class="lens-capture-btn">📷 Capture &amp; Translate</button>
+    </div>
+  </div>
 
   <script src="app.js"></script>
 </body>
