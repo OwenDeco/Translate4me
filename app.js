@@ -58,9 +58,17 @@ function updateCharCount() {
 }
 
 function showError(msg) {
+  errorMsg.style.color = 'var(--red)';
   errorMsg.textContent = msg;
   errorMsg.classList.remove('hidden');
   setTimeout(() => errorMsg.classList.add('hidden'), 5000);
+}
+
+function showInfo(msg) {
+  errorMsg.style.color = 'var(--muted)';
+  errorMsg.textContent = msg;
+  errorMsg.classList.remove('hidden');
+  setTimeout(() => errorMsg.classList.add('hidden'), 4000);
 }
 
 function setOutput(text) {
@@ -145,13 +153,34 @@ copyBtn.addEventListener('click', () => {
 
 // ── Speak (TTS) ───────────────────────────────────────────────────────────────
 
-speakBtn.addEventListener('click', () => {
-  if (!lastTranslation || !window.speechSynthesis) return;
-  const utt = new SpeechSynthesisUtterance(lastTranslation);
-  utt.lang = tgtLocale();
-  speechSynthesis.cancel();
-  speechSynthesis.speak(utt);
-});
+// Mobile browsers break when cancel() is called right before speak().
+// If already speaking: cancel then wait 50ms; if voices aren't loaded yet: wait
+// for voiceschanged. Phrase cards call this directly inside the click handler
+// so the gesture context is intact — no async gap before speak().
+function speakText(text, lang) {
+  if (!text || !window.speechSynthesis) return;
+
+  function doSpeak() {
+    const utt = new SpeechSynthesisUtterance(text);
+    utt.lang = lang;
+    const voices = speechSynthesis.getVoices();
+    const match = voices.find(v => v.lang === lang)
+               || voices.find(v => v.lang.startsWith(lang.split('-')[0]));
+    if (match) utt.voice = match;
+    speechSynthesis.speak(utt);
+  }
+
+  if (speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    setTimeout(doSpeak, 50);
+  } else if (speechSynthesis.getVoices().length === 0) {
+    speechSynthesis.addEventListener('voiceschanged', doSpeak, { once: true });
+  } else {
+    doSpeak();
+  }
+}
+
+speakBtn.addEventListener('click', () => speakText(lastTranslation, tgtLocale()));
 
 // ── OCR Scan ──────────────────────────────────────────────────────────────────
 
@@ -169,7 +198,8 @@ imgInput.addEventListener('change', async () => {
   progressLabel.textContent = 'Loading OCR…';
 
   try {
-    const result = await Tesseract.recognize(file, ocrLang(), {
+    // OEM 1 = LSTM-only — significantly better accuracy for Japanese
+    const worker = await Tesseract.createWorker(ocrLang(), 1, {
       logger: m => {
         if (m.status === 'recognizing text') {
           const pct = Math.round(m.progress * 100);
@@ -183,12 +213,17 @@ imgInput.addEventListener('change', async () => {
       },
     });
 
-    const text = result.data.text.trim();
-    if (!text) { showError('No text detected in image. Try a clearer photo.'); return; }
-    sourceText.value = text;
+    const { data: { text } } = await worker.recognize(file);
+    await worker.terminate();
+
+    const cleaned = text.trim();
+    if (!cleaned) { showError('No text detected. Try a clearer, well-lit photo.'); return; }
+
+    // Put extracted text in textarea so user can review/edit before translating
+    sourceText.value = cleaned;
     updateCharCount();
-    doTranslate();
-  } catch (err) {
+    showInfo('Text extracted — review it above, then tap Translate.');
+  } catch {
     showError('OCR failed. Please try again with a clearer image.');
   } finally {
     scanBtn.disabled = false;
@@ -258,7 +293,11 @@ PHRASES.forEach(p => {
     updateLabels();
     sourceText.value = p.en;
     updateCharCount();
-    doTranslate();
+    // Set output directly — no API call needed, Japanese is already known.
+    // Speaking here (inside the click handler) keeps the user-gesture context
+    // intact for mobile browsers, which require speech to start synchronously.
+    setOutput(p.ja);
+    speakText(p.ja, 'ja-JP');
   });
   phrasesGrid.appendChild(card);
 });
