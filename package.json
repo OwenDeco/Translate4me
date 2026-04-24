@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "pkill -f 'node server.js' 2>/dev/null; nohup node server.js > server.log 2>&1 & echo Server started",
     "stop": "pkill -f 'node server.js' || true",
-    "restart": "npm stop && npm start"
+    "restart": "npm stop && npm start",
+    "logs": "tail -f server.log"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",

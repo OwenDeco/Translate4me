@@ -23,4 +23,9 @@ git pull origin main --quiet 2>/dev/null || true
 
 npm install --silent 2>/dev/null
 
-exec node server.js
+# Kill any previous instance
+pkill -f "node server.js" 2>/dev/null || true
+
+# Start in background, log to server.log
+nohup node server.js > server.log 2>&1 &
+echo "Server started (PID $!). Logs: tail -f server.log"
