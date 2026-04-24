@@ -1,0 +1,17 @@
+{
+  "name": "Translate4me",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "forwardPorts": [3000],
+  "portsAttributes": {
+    "3000": {
+      "label": "Translate4me App",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postStartCommand": "npx --yes serve -s . -l 3000",
+  "customizations": {
+    "vscode": {
+      "extensions": ["esbenp.prettier-vscode"]
+    }
+  }
+}

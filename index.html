@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Translate4me – Japanese Travel Translator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>🌸 Translate4me</h1>
+    <p class="tagline">Your Japanese travel companion</p>
+  </header>
+
+  <main>
+    <section class="translator-card">
+      <div class="lang-row">
+        <div class="lang-group">
+          <label for="source-lang">From</label>
+          <select id="source-lang">
+            <option value="en">English</option>
+            <option value="ja">Japanese</option>
+            <option value="zh">Chinese</option>
+            <option value="ko">Korean</option>
+            <option value="fr">French</option>
+            <option value="es">Spanish</option>
+          </select>
+        </div>
+        <button id="swap-btn" title="Swap languages" aria-label="Swap languages">⇄</button>
+        <div class="lang-group">
+          <label for="target-lang">To</label>
+          <select id="target-lang">
+            <option value="ja">Japanese</option>
+            <option value="en">English</option>
+            <option value="zh">Chinese</option>
+            <option value="ko">Korean</option>
+            <option value="fr">French</option>
+            <option value="es">Spanish</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="text-row">
+        <div class="text-group">
+          <textarea
+            id="source-text"
+            placeholder="Enter text to translate…"
+            rows="5"
+            aria-label="Source text"
+          ></textarea>
+          <div class="text-actions">
+            <button class="icon-btn" id="clear-btn" title="Clear">✕ Clear</button>
+            <span id="char-count">0 / 500</span>
+          </div>
+        </div>
+
+        <div class="text-group output-group">
+          <div id="output-text" class="output" aria-live="polite" aria-label="Translation output">
+            <span class="placeholder">Translation will appear here…</span>
+          </div>
+          <div class="text-actions">
+            <button class="icon-btn" id="copy-btn" title="Copy translation">📋 Copy</button>
+            <button class="icon-btn" id="speak-btn" title="Speak translation">🔊 Speak</button>
+          </div>
+        </div>
+      </div>
+
+      <button id="translate-btn" class="primary-btn">Translate</button>
+      <div id="error-msg" class="error hidden"></div>
+    </section>
+
+    <section class="phrasebook">
+      <h2>Quick Japanese Phrases</h2>
+      <div class="phrases-grid" id="phrases-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made for Japanese Travels &nbsp;🗾</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
