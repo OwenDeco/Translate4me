@@ -11,7 +11,7 @@
       "onAutoForward": "openBrowser"
     }
   },
-  "postStartCommand": "npm install --silent && node server.js",
+  "postStartCommand": "export PATH=/opt/node22/bin:$PATH && npm install --silent && node server.js",
   "customizations": {
     "vscode": {
       "extensions": ["esbenp.prettier-vscode"]
