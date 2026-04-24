@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Translate4me – Japanese Travel Translator</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1>🌸 Translate4me</h1>
+    <p class="tagline">Your Japanese travel companion</p>
+  </header>
+
+  <main>
+    <div class="translator-card">
+
+      <div class="lang-bar">
+        <span class="lang-label" id="src-label">English</span>
+        <button id="swap-btn" title="Swap direction">⇄</button>
+        <span class="lang-label" id="tgt-label">Japanese</span>
+      </div>
+
+      <!-- Source panel -->
+      <div class="panel">
+        <textarea
+          id="source-text"
+          placeholder="Type, scan, or speak…"
+          rows="5"
+          aria-label="Source text"
+        ></textarea>
+
+        <div class="panel-actions">
+          <div class="action-group">
+            <button class="icon-btn" id="scan-btn">📷 Scan</button>
+            <button class="icon-btn" id="listen-btn">🎤 Listen</button>
+            <button class="icon-btn" id="clear-btn">✕ Clear</button>
+          </div>
+          <span id="char-count">0 / 500</span>
+        </div>
+
+        <input type="file" id="img-input" accept="image/*" capture="environment" hidden />
+
+        <div id="ocr-progress" class="ocr-progress hidden">
+          <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+          <span id="progress-label">Scanning…</span>
+        </div>
+      </div>
+
+      <button id="translate-btn" class="primary-btn">Translate</button>
+
+      <!-- Output panel -->
+      <div class="panel output-panel">
+        <div id="output-text" class="output" aria-live="polite" aria-label="Translation">
+          <span class="placeholder">Translation will appear here…</span>
+        </div>
+        <div class="panel-actions">
+          <div class="action-group">
+            <button class="icon-btn" id="copy-btn">📋 Copy</button>
+            <button class="icon-btn" id="speak-btn">🔊 Speak</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="error-msg" class="error hidden"></div>
+    </div>
+
+    <section class="phrasebook">
+      <h2>Quick Japanese Phrases</h2>
+      <div class="phrases-grid" id="phrases-grid"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Made for Japanese Travels &nbsp;🗾</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
