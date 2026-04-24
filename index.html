@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Translate4me – Japanese Travel Translator</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 </head>
 <body>
   <header>
@@ -13,61 +14,57 @@
   </header>
 
   <main>
-    <section class="translator-card">
-      <div class="lang-row">
-        <div class="lang-group">
-          <label for="source-lang">From</label>
-          <select id="source-lang">
-            <option value="en">English</option>
-            <option value="ja">Japanese</option>
-            <option value="zh">Chinese</option>
-            <option value="ko">Korean</option>
-            <option value="fr">French</option>
-            <option value="es">Spanish</option>
-          </select>
-        </div>
-        <button id="swap-btn" title="Swap languages" aria-label="Swap languages">⇄</button>
-        <div class="lang-group">
-          <label for="target-lang">To</label>
-          <select id="target-lang">
-            <option value="ja">Japanese</option>
-            <option value="en">English</option>
-            <option value="zh">Chinese</option>
-            <option value="ko">Korean</option>
-            <option value="fr">French</option>
-            <option value="es">Spanish</option>
-          </select>
-        </div>
+    <div class="translator-card">
+
+      <div class="lang-bar">
+        <span class="lang-label" id="src-label">English</span>
+        <button id="swap-btn" title="Swap direction">⇄</button>
+        <span class="lang-label" id="tgt-label">Japanese</span>
       </div>
 
-      <div class="text-row">
-        <div class="text-group">
-          <textarea
-            id="source-text"
-            placeholder="Enter text to translate…"
-            rows="5"
-            aria-label="Source text"
-          ></textarea>
-          <div class="text-actions">
-            <button class="icon-btn" id="clear-btn" title="Clear">✕ Clear</button>
-            <span id="char-count">0 / 500</span>
+      <!-- Source panel -->
+      <div class="panel">
+        <textarea
+          id="source-text"
+          placeholder="Type, scan, or speak…"
+          rows="5"
+          aria-label="Source text"
+        ></textarea>
+
+        <div class="panel-actions">
+          <div class="action-group">
+            <button class="icon-btn" id="scan-btn">📷 Scan</button>
+            <button class="icon-btn" id="listen-btn">🎤 Listen</button>
+            <button class="icon-btn" id="clear-btn">✕ Clear</button>
           </div>
+          <span id="char-count">0 / 500</span>
         </div>
 
-        <div class="text-group output-group">
-          <div id="output-text" class="output" aria-live="polite" aria-label="Translation output">
-            <span class="placeholder">Translation will appear here…</span>
-          </div>
-          <div class="text-actions">
-            <button class="icon-btn" id="copy-btn" title="Copy translation">📋 Copy</button>
-            <button class="icon-btn" id="speak-btn" title="Speak translation">🔊 Speak</button>
-          </div>
+        <input type="file" id="img-input" accept="image/*" capture="environment" hidden />
+
+        <div id="ocr-progress" class="ocr-progress hidden">
+          <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
+          <span id="progress-label">Scanning…</span>
         </div>
       </div>
 
       <button id="translate-btn" class="primary-btn">Translate</button>
+
+      <!-- Output panel -->
+      <div class="panel output-panel">
+        <div id="output-text" class="output" aria-live="polite" aria-label="Translation">
+          <span class="placeholder">Translation will appear here…</span>
+        </div>
+        <div class="panel-actions">
+          <div class="action-group">
+            <button class="icon-btn" id="copy-btn">📋 Copy</button>
+            <button class="icon-btn" id="speak-btn">🔊 Speak</button>
+          </div>
+        </div>
+      </div>
+
       <div id="error-msg" class="error hidden"></div>
-    </section>
+    </div>
 
     <section class="phrasebook">
       <h2>Quick Japanese Phrases</h2>

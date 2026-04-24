@@ -8,7 +8,6 @@
       "onAutoForward": "openBrowser"
     }
   },
-  "postStartCommand": "npx --yes serve -s . -l 3000",
   "customizations": {
     "vscode": {
       "extensions": ["esbenp.prettier-vscode"]
