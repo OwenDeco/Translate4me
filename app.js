@@ -44,7 +44,6 @@ function srcLang()    { return direction === 'en-ja' ? 'en' : 'ja'; }
 function tgtLang()    { return direction === 'en-ja' ? 'ja' : 'en'; }
 function srcLocale()  { return direction === 'en-ja' ? 'en-US' : 'ja-JP'; }
 function tgtLocale()  { return direction === 'en-ja' ? 'ja-JP' : 'en-US'; }
-function ocrLang()    { return direction === 'en-ja' ? 'eng' : 'jpn'; }
 
 function updateLabels() {
   srcLabel.textContent = direction === 'en-ja' ? 'English' : 'Japanese';
@@ -194,37 +193,35 @@ imgInput.addEventListener('change', async () => {
   scanBtn.disabled = true;
   errorMsg.classList.add('hidden');
   ocrProgress.classList.remove('hidden');
-  progressFill.style.width = '0%';
-  progressLabel.textContent = 'Loading OCR…';
+  progressFill.style.width = '30%';
+  progressLabel.textContent = 'Scanning with AI…';
 
   try {
-    // OEM 1 = LSTM-only — significantly better accuracy for Japanese
-    const worker = await Tesseract.createWorker(ocrLang(), 1, {
-      logger: m => {
-        if (m.status === 'recognizing text') {
-          const pct = Math.round(m.progress * 100);
-          progressFill.style.width = `${pct}%`;
-          progressLabel.textContent = `Scanning… ${pct}%`;
-        } else if (m.status === 'loading tesseract core') {
-          progressLabel.textContent = 'Loading OCR engine…';
-        } else if (m.status === 'loading language traineddata') {
-          progressLabel.textContent = `Loading ${direction === 'ja-en' ? 'Japanese' : 'English'} model…`;
-        }
-      },
-    });
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('direction', direction);
 
-    const { data: { text } } = await worker.recognize(file);
-    await worker.terminate();
+    progressFill.style.width = '60%';
+    const res = await fetch('/api/scan', { method: 'POST', body: formData });
+    progressFill.style.width = '90%';
 
-    const cleaned = text.trim();
-    if (!cleaned) { showError('No text detected. Try a clearer, well-lit photo.'); return; }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Server error');
+    }
 
-    // Put extracted text in textarea so user can review/edit before translating
-    sourceText.value = cleaned;
+    const data = await res.json();
+    if (!data.original && !data.translation) {
+      showError('No text detected. Try a clearer, well-lit photo.');
+      return;
+    }
+
+    sourceText.value = data.original || '';
     updateCharCount();
-    showInfo('Text extracted — review it above, then tap Translate.');
-  } catch {
-    showError('OCR failed. Please try again with a clearer image.');
+    setOutput(data.translation || '');
+    progressFill.style.width = '100%';
+  } catch (err) {
+    showError(err.message || 'AI scan failed. Please try again.');
   } finally {
     scanBtn.disabled = false;
     ocrProgress.classList.add('hidden');
